@@ -12,7 +12,7 @@ module MyMongoid
     included do
       class_attribute :fields
       self.fields = {}
-      field :_id
+      field :_id, :as => :id
       MyMongoid.register_model(self)
     end
 
@@ -70,13 +70,13 @@ module MyMongoid
         true
       end
 
-      def field(key)
+      def field(key, options = nil)
 
         key = key.to_s
 
         raise DuplicateFieldError if self.fields.has_key?(key)
 
-        self.fields[key] = Field.new(key)
+        self.fields[key] = Field.new(key, options)
 
         define_method(key){
           @attributes["#{key}"]
@@ -84,6 +84,20 @@ module MyMongoid
         define_method("#{key}="){ |value|
           @attributes["#{key}"] = value
         }
+
+        if options 
+          options.each do |k, v| 
+
+            if k == :as 
+              define_method(v){
+                @attributes["#{key}"]
+              }
+              define_method("#{v}="){ |value|
+                @attributes["#{key}"] = value
+              }
+            end
+          end
+        end
 
 
       end
