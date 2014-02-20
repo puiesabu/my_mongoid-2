@@ -3,6 +3,7 @@ require "my_mongoid/field"
 
 module MyMongoid
   module Document
+    included MyMongoid::Field
 
     extend ActiveSupport::Concern
 
