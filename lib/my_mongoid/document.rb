@@ -1,11 +1,16 @@
 require 'active_support/all'
+require "my_mongoid/field"
 
 module MyMongoid
   module Document
 
     extend ActiveSupport::Concern
 
+
     included do
+      class_attribute :fields
+      self.fields = {}
+      field :_id
       MyMongoid.register_model(self)
     end
 
@@ -14,6 +19,13 @@ module MyMongoid
       raise ArgumentError, 'The argument  is not a Hash object' unless attrs.class == Hash 
       
       @attributes = attrs
+
+      #return unless self.fields.empty?
+      # @attributes.each_key {|key|
+      #   Document.fields[key] = MyMongoid::Field.new
+      # }
+
+
     end
 
     def attributes 
@@ -32,11 +44,48 @@ module MyMongoid
       true
     end
 
+    def process_attributes(attrs = nil)
+      attrs ||= {}
+      if !attrs.empty?
+        attrs.each_pair do |key, value|
+
+        end
+      end
+    end
+
+   
+
 
     module ClassMethods
+
+
       def is_mongoid_model?
         true
       end
+
+      def field(key)
+
+        key = key.to_s
+
+        raise DuplicateFieldError if self.fields.has_key?(key)
+
+        self.fields[key] = Field.new(key)
+
+        define_method(key){
+          @attributes["#{key}"]
+        }
+        define_method("#{key}="){ |value|
+          @attributes["#{key}"] = value
+        }
+
+
+      end
+
+      def fields
+        Document.fields
+      end
+
+
     end
     
   end
