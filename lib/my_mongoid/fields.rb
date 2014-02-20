@@ -45,6 +45,9 @@ module MyMongoid
             options.each do |k, v| 
 
               if k == :as 
+                v == v.to_s
+                self.fields[v] = Field.new(v, nil)
+
                 define_method(v){
                   @attributes["#{key}"]
                 }
