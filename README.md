@@ -1,8 +1,10 @@
 # MyMongoid
 
-Travis-ci
 
 [![Build Status](https://travis-ci.org/oa414/my_mongoid.png?branch=master)](https://travis-ci.org/oa414/my_mongoid)
+
+
+[![Coverage Status](https://coveralls.io/repos/oa414/my_mongoid/badge.png?branch=master)](https://coveralls.io/r/oa414/my_mongoid?branch=master)
 
 TODO: Write a gem description
 
