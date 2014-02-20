@@ -2,7 +2,7 @@
 
 Travis-ci
 
-![[Build Status]](https://travis-ci.org/{your_github_account}/my_mongoid)
+![[Build Status]](https://travis-ci.org/oa414/my_mongoid)
 
 TODO: Write a gem description
 
