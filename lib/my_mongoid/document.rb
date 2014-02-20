@@ -7,6 +7,8 @@ module MyMongoid
     extend ActiveSupport::Concern
 
 
+
+
     included do
       class_attribute :fields
       self.fields = {}
@@ -18,7 +20,9 @@ module MyMongoid
     def initialize(attrs = {})
       raise ArgumentError, 'The argument  is not a Hash object' unless attrs.class == Hash 
       
-      @attributes = attrs
+      @attributes = {}
+
+      process_attributes(attrs)
 
       #return unless self.fields.empty?
       # @attributes.each_key {|key|
@@ -47,11 +51,14 @@ module MyMongoid
     def process_attributes(attrs = nil)
       attrs ||= {}
       if !attrs.empty?
-        attrs.each_pair do |key, value|
-
+        attrs.each do |key, value|
+          raise MyMongoid::UnknownAttributeError unless  self.class.fields.include? key.to_s
+         
+          self.send "#{key}=", value
         end
       end
     end
+    alias_method  :attributes= ,  :process_attributes
 
    
 
