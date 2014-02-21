@@ -1,14 +1,11 @@
 require "spec_helper"
 
 
-class Event
-  include MyMongoid::Document
-  field :public
-  #field :id
-end
+
 
 
 describe MyMongoid::Document do
+
 
   let(:attributes) {
    {"id" => "123", "public" => true}
@@ -51,6 +48,8 @@ describe MyMongoid::Document do
   end
 
   describe "#process_attributes"
+
+
   describe "#new_record?"
 
 end

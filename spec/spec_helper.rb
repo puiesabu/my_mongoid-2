@@ -26,3 +26,5 @@ RSpec.configure do |config|
 end
 
 require "my_mongoid"
+
+
