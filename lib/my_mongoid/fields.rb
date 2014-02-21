@@ -19,7 +19,7 @@ module MyMongoid
       included do
         class_attribute :fields
         self.fields = {}
-        field :_id, :as => :id
+        field :id , :as => :_id
       end
 
 
@@ -29,6 +29,7 @@ module MyMongoid
         def field(key, options = nil)
 
           key = key.to_s
+
 
           raise DuplicateFieldError if self.fields.has_key?(key)
 
@@ -45,7 +46,7 @@ module MyMongoid
             options.each do |k, v| 
 
               if k == :as 
-                v == v.to_s
+                v = v.to_s
                 self.fields[v] = Field.new(v, nil)
 
                 define_method(v){
