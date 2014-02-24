@@ -11,29 +11,33 @@ require "my_mongoid/configuration"
 
 module MyMongoid
 
-  @@session = nil
+  extend self
+  @session = nil
 
-  def self.configure(&block)
+  def configure(&block)
     block_given? ? yield(Configuration.instance) : Configuration.instance
   end
 
-  def self.configuration  
+  def configuration  
     Configuration.instance
   end
 
-  def self.session
-    @@session = Moped::Session.new([ Configuration.instance.host ])
-    @@session.use Configuration.instance.database
-    @@session
+  def session
+    if Configuration.instance.host.nil? or Configuration.instance.database.nil?
+      raise UnconfiguredDatabaseError
+    end
+    @session = Moped::Session.new([ Configuration.instance.host ])
+    @session.use Configuration.instance.database
+    @session
   end
 
 
 
-  def self.models
+  def models
     @models ||= []
   end
 
-  def self.register_model(klass)
+  def register_model(klass)
     models << klass
   end
 
@@ -44,4 +48,8 @@ module MyMongoid
   class UnknownAttributeError < StandardError
 
   end
+
+  class UnconfiguredDatabaseError < StandardError 
+  end
+
 end

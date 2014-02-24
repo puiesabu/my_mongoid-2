@@ -50,3 +50,22 @@ describe "Should be able to configure MyMongoid:" do
 end
 
 
+describe "Should be able to get database session:" do   
+  describe "MyMongoid.session" do 
+    it "should return a Moped::Session" do 
+      expect(MyMongoid.session).to be_an(Moped::Session)
+    end
+    it "should memoize the session @session" do 
+      expect(MyMongoid.instance_variable_get(:@session)).to be_an(Moped::Session)
+    end
+    it "should raise MyMongoid::UnconfiguredDatabaseError if host and database are not configured" do 
+      MyMongoid.configure do |config|
+        config.database = nil
+        config.host = nil
+      end
+      expect {
+        MyMongoid.session
+      }.to raise_error(MyMongoid::UnconfiguredDatabaseError)
+    end
+  end
+end
