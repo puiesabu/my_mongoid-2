@@ -19,7 +19,7 @@ module MyMongoid
       included do
         class_attribute :fields
         self.fields = {}
-        field :id , :as => :_id
+        field :_id , :as => :id
       end
 
 
@@ -39,7 +39,11 @@ module MyMongoid
             @attributes["#{key}"]
           }
           define_method("#{key}="){ |value|
-            @attributes["#{key}"] = value
+            if @attributes["#{key}"] != value
+              changed_attributes["#{key}"] = @attributes["#{key}"]
+              @attributes["#{key}"] = value
+              
+            end
           }
 
           if options 
@@ -53,7 +57,10 @@ module MyMongoid
                   @attributes["#{key}"]
                 }
                 define_method("#{v}="){ |value|
-                  @attributes["#{key}"] = value
+                  if @attributes["#{key}"] != value
+                    changed_attributes["#{key}"] = @attributes["#{key}"]
+                    @attributes["#{key}"] = value
+                  end
                 }
               end
             end
