@@ -19,6 +19,8 @@ module MyMongoid
       process_attributes(attrs)
     end
 
+ 
+   
     def attributes 
       @attributes
     end
@@ -54,6 +56,16 @@ module MyMongoid
       def is_mongoid_model?
         true
       end
+
+      def collection_name
+        self.to_s.tableize
+      end
+
+      def collection
+        MyMongoid.session[collection_name]
+      end
+
+
 
     end
     

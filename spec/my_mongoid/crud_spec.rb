@@ -1,4 +1,5 @@
 
+require "spec_helper"
 
 
 describe "Should be able to configure MyMongoid:" do 
@@ -68,4 +69,32 @@ describe "Should be able to get database session:" do
       }.to raise_error(MyMongoid::UnconfiguredDatabaseError)
     end
   end
+end
+
+class Event
+  include MyMongoid::Document
+  field :public
+  field :created_at
+end
+
+
+
+describe  "Should be able to create a record:" do 
+
+  describe "model collection:" do 
+    it "Model.collection_name should use active support's titleize method" do 
+      expect(Event.collection_name).to eq("events")
+    end
+
+    it " Model.collection should return a model's collection" do 
+      MyMongoid.configure do |config|
+        config.database = "my_mongoid"
+        config.host = "localhost:27017"
+      end
+      expect(Event.collection).to be_an(Moped::Collection)
+    end
+  end
+  
+ 
+
 end
