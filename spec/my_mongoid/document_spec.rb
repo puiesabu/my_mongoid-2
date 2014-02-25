@@ -1,9 +1,5 @@
 require "spec_helper"
 
-
-
-
-
 describe MyMongoid::Document do
 
 

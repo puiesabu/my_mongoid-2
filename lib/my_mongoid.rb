@@ -1,6 +1,6 @@
 require 'active_support/all'
 require "moped"
-
+require "bson"
 
 require "my_mongoid/version"
 require "my_mongoid/document"
@@ -9,29 +9,10 @@ require "my_mongoid/configuration"
 
 
 
+
+
 module MyMongoid
-
   extend self
-  @session = nil
-
-  def configure(&block)
-    block_given? ? yield(Configuration.instance) : Configuration.instance
-  end
-
-  def configuration  
-    Configuration.instance
-  end
-
-  def session
-    if Configuration.instance.host.nil? or Configuration.instance.database.nil?
-      raise UnconfiguredDatabaseError
-    end
-    @session = Moped::Session.new([ Configuration.instance.host ])
-    @session.use Configuration.instance.database
-    @session
-  end
-
-
 
   def models
     @models ||= []
@@ -39,6 +20,26 @@ module MyMongoid
 
   def register_model(klass)
     models << klass
+  end
+
+  def self.configuration
+    
+     MyMongoid::Configuration.instance
+  end
+
+  def self.configure
+    yield MyMongoid::Configuration.instance if block_given?
+   end
+
+  def self.session
+    raise UnconfiguredDatabaseError if (self.configuration.host==nil || self.configuration.database==nil)
+    @session ||= create_session
+  end
+
+  def self.create_session
+    session ||= ::Moped::Session.new([configuration.host])
+    session.use configuration.database
+    session
   end
 
   class DuplicateFieldError < StandardError
@@ -50,10 +51,13 @@ module MyMongoid
   end
 
   class UnconfiguredDatabaseError < StandardError 
+
   end
 
   class RecordNotFoundError  < StandardError 
+
   end
+
 
 end
 
