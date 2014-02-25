@@ -81,6 +81,21 @@ end
 
 describe  "Should be able to create a record:" do 
 
+  let(:attributes) {
+    {"id" => "123", "public" => true}
+  }
+
+  let(:event) {
+    Event.new(attributes)
+  }
+
+  before do
+    MyMongoid.configure do |config|
+      config.database = "my_mongoid"
+      config.host = "localhost:27017"
+    end
+  end
+
   context "model collection:" do 
     it "Model.collection_name should use active support's titleize method" do 
       expect(Event.collection_name).to eq("events")
@@ -95,34 +110,24 @@ describe  "Should be able to create a record:" do
     end
   end
 
-  context "Should be able to create a record" do
-     let(:attributes) {
-       {"id" => "123", "public" => true}
-     }
+  describe "Should be able to create a record" do
+ 
 
-    let(:event) {
-      Event.new(attributes)
-    }
+      it "#to_document" do 
+        expect(event.to_document).to be_an(Hash)
+      end 
 
-    it "#to_document" do 
-      expect(event.to_document).to be_an(Hash)
-    end 
-
-    describe "Should be able to create a record:" do 
       it "#should return a saved record " do
         expect(Event.create(attributes)).to be_an(MyMongoid::Document)
       end
+
+      it "should generate a random id" do 
+        expect(Event.create({"public" => "juan"}).id).to be_an(BSON::ObjectId)
+      end
     end
 
-    describe "#save" do 
-      before do
-        MyMongoid.configure do |config|
-          config.database = "my_mongoid"
-          config.host = "localhost:27017"
-        end
-      end
-
-
+  describe "#save" do 
+ 
       it "should insert a new record into the db" do 
 
       end
@@ -133,9 +138,50 @@ describe  "Should be able to create a record:" do
         event.save
         expect(event.new_record?).to be(false)
       end
+  end
+
+  describe "#find" do 
+    let(:attributes) {
+      {"id" => "123", "public" => true}
+    }
+
+
+    before do
+      MyMongoid.configure do |config|
+        config.database = "my_mongoid"
+        config.host = "localhost:27017"
+      end
+      Event.create({"_id" => "123"})
+    end
+  
+    
+
+    it " Model.instantiate should return a model instance" do 
+      expect(Event.instantiate(attributes)).to be_an (Event)
     end
 
+    it " Model.instantiate should return an instance that's not a new_record" do 
+      expect(Event.instantiate(attributes).new_record?).to eq (false)
+    end
+    
+    it " Model.instantiate should have the given attributes" do 
+      expect(Event.instantiate(attributes).public).to eq(true)
+    end
+    
+    it "should be able to find a record by issuing query" do 
+      expect(Event.find("123")).to be_an(Moped::Query) 
+    end
+    
+    it "should be able to find a record by issuing shorthand id query" do 
+      expect(Event.find("_id" => "123")).to be_an(Moped::Query)
+
+    end
+
+    
+    it "should raise Mongoid::RecordNotFoundError if nothing is found for an id" do 
+      expect(Event.find("_id" => "zj")).to raise_error(MyMongoid::RecordNotFoundError)
+    end
+    
   end
  
-
 end

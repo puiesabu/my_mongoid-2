@@ -14,7 +14,7 @@ module MyMongoid
 
 
     def initialize(attrs = nil)
-      raise ArgumentError, 'The argument  is not a Hash object' unless attrs.class == Hash 
+      raise ArgumentError, 'The argument is not a Hash object' unless attrs.class == Hash 
       @attributes = {}
       @new_record = true
       process_attributes(attrs)
@@ -38,12 +38,14 @@ module MyMongoid
       @new_record
     end
 
+
+
     def process_attributes(attrs = nil)
       attrs ||= {}
       if !attrs.empty?
         attrs.each do |key, value|
           raise MyMongoid::UnknownAttributeError unless  self.class.fields.include? key.to_s
-         
+
           self.send "#{key}=", value
         end
       end
@@ -55,10 +57,13 @@ module MyMongoid
     end
 
     def save
+      @attributes["id"] = BSON::ObjectId.new unless  @attributes["_id"]
       self.class.collection.insert(to_document)
       @new_record = false
       true
     end
+
+
     
     
 
@@ -82,6 +87,25 @@ module MyMongoid
         record
       end
 
+      def find(attrs)
+        records = {}
+        if attrs.is_a? String
+          records = collection.find("_id" => attrs)
+        else 
+          records = collection.find(attrs)
+        end
+        #raise RecordNotFoundError unless records.count > 0
+        records
+      end
+
+      def instantiate(attrs) 
+        record = self.new attrs
+        record.instance_eval {
+          @attributes = attrs
+          @new_record = false
+        }
+        record
+      end
 
     end
     
