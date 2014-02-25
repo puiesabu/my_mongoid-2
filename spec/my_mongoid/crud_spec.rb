@@ -105,7 +105,7 @@ describe  "Should be able to create a record:" do
     }
 
     it "#to_document" do 
-      expect(event.to_document).to be_an(BSON::Document)
+      expect(event.to_document).to be_an(Hash)
     end 
 
     describe "Should be able to create a record:" do 

@@ -51,7 +51,7 @@ module MyMongoid
     alias_method  :attributes= ,  :process_attributes
 
     def to_document
-      BSON::Document.new @attributes
+      @attributes
     end
 
     def save
