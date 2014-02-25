@@ -81,7 +81,7 @@ end
 
 describe  "Should be able to create a record:" do 
 
-  describe "model collection:" do 
+  context "model collection:" do 
     it "Model.collection_name should use active support's titleize method" do 
       expect(Event.collection_name).to eq("events")
     end
@@ -94,7 +94,48 @@ describe  "Should be able to create a record:" do
       expect(Event.collection).to be_an(Moped::Collection)
     end
   end
-  
+
+  context "Should be able to create a record" do
+     let(:attributes) {
+       {"id" => "123", "public" => true}
+     }
+
+    let(:event) {
+      Event.new(attributes)
+    }
+
+    it "#to_document" do 
+      expect(event.to_document).to be_an(BSON::Document)
+    end 
+
+    describe "Should be able to create a record:" do 
+      it "#should return a saved record " do
+        expect(Event.create(attributes)).to be_an(MyMongoid::Document)
+      end
+    end
+
+    describe "#save" do 
+      before do
+        MyMongoid.configure do |config|
+          config.database = "my_mongoid"
+          config.host = "localhost:27017"
+        end
+      end
+
+
+      it "should insert a new record into the db" do 
+
+      end
+      it "should return true" do 
+        expect(event.save).to be(true)
+      end
+      it "should make Model#new_record return false" do 
+        event.save
+        expect(event.new_record?).to be(false)
+      end
+    end
+
+  end
  
 
 end

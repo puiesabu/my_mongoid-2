@@ -16,6 +16,7 @@ module MyMongoid
     def initialize(attrs = nil)
       raise ArgumentError, 'The argument  is not a Hash object' unless attrs.class == Hash 
       @attributes = {}
+      @new_record = true
       process_attributes(attrs)
     end
 
@@ -34,7 +35,7 @@ module MyMongoid
     end
 
     def new_record?
-      true
+      @new_record
     end
 
     def process_attributes(attrs = nil)
@@ -49,7 +50,17 @@ module MyMongoid
     end
     alias_method  :attributes= ,  :process_attributes
 
-   
+    def to_document
+      BSON::Document.new @attributes
+    end
+
+    def save
+      self.class.collection.insert(to_document)
+      @new_record = false
+      true
+    end
+    
+    
 
     module ClassMethods
 
@@ -65,6 +76,11 @@ module MyMongoid
         MyMongoid.session[collection_name]
       end
 
+      def create(attrs = nil)
+        record = self.new(attrs)
+        record.save
+        record
+      end
 
 
     end
