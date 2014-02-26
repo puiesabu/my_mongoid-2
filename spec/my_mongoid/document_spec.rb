@@ -4,7 +4,7 @@ describe MyMongoid::Document do
 
 
   let(:attributes) {
-   {"id" => "123", "public" => true}
+   {"_id" => "123", "public" => true}
   }
 
   let(:event) {
