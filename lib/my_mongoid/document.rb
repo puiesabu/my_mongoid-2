@@ -1,14 +1,28 @@
 require "my_mongoid/fields"
 require "active_support/inflector"
+require "active_model"
 
 module MyMongoid
   module Document
     extend ActiveSupport::Concern
     include Fields
     included do
+      extend ActiveModel::Callbacks
+      include ActiveModel::Validations::Callbacks
+
+      define_model_callbacks :delete, :save, :create, :update
+      define_model_callbacks :find, :initialize, only: :after
+
+      before_save :before_save_callback
+      around_save :around_save_callback
+      after_save :after_save_callback
+      before_create :before_create_callback
+      around_create :around_create_callback
+      after_create :after_create_callback
+
       MyMongoid.register_model(self)
     end
-
+    
     def initialize(attrs = nil)
       raise ArgumentError, 'The argument is not a Hash object' unless attrs.class == Hash 
       @attributes = {}
@@ -44,14 +58,38 @@ module MyMongoid
     end
 
     def save 
-      if @new_record == true
-        self.class.collection.insert(@attributes)
-      else changed?
-        update_document
+      run_callbacks(:save) do
+        if @new_record == true
+          run_callbacks(:create) do
+            self.class.collection.insert(@attributes)
+          end
+        else changed?
+          update_document
+        end
+        #self.class.collection.insert(@attributes)
+        @new_record = false
+        true
       end
-      #self.class.collection.insert(@attributes)
-      @new_record = false
-      true
+    end
+
+    def before_save_callback
+    end
+
+    def around_save_callback
+      yield self if block_given?
+    end
+
+    def after_save_callback
+    end
+
+    def before_create_callback
+    end
+
+    def around_create_callback
+      yield self if block_given?
+    end
+
+    def after_create_callback
     end
 
     def atomic_updates
@@ -108,7 +146,6 @@ module MyMongoid
       @changed_attributes ||= {}
     end
     alias_method  :attributes= ,  :process_attributes
-
 
     module ClassMethods
 
