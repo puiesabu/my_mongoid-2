@@ -54,6 +54,7 @@ module MyMongoid
 
     def save 
       run_callbacks :save do
+
         if @new_record == true
           self.class.collection.insert(@attributes)
         else changed?
@@ -64,6 +65,35 @@ module MyMongoid
         true
       end
       true
+    end
+
+
+    def save(create = nil)
+      run_callbacks :save do
+        if create    
+          run_callbacks :create do
+
+            if @new_record == true
+              self.class.collection.insert(@attributes)
+            else changed?
+              update_document
+            end
+            #self.class.collection.insert(@attributes)
+            @new_record = false
+            return true
+          end
+        else     
+            if @new_record == true
+              self.class.collection.insert(@attributes)
+            else changed?
+              update_document
+            end
+            #self.class.collection.insert(@attributes)
+            @new_record = false
+            return true
+        end
+        true
+      end
     end
 
     def atomic_updates
@@ -150,7 +180,7 @@ module MyMongoid
           doc = allocate
           doc.instance_variable_set(:@attributes, attributes)
           doc.instance_variable_set(:@new_record, true)
-          doc.save
+          doc.save(:create)
           doc
 
       end
