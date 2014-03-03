@@ -13,13 +13,6 @@ module MyMongoid
       define_model_callbacks :delete, :save, :create, :update
       define_model_callbacks :find, :initialize, only: :after
 
-      before_save :before_save_callback
-      around_save :around_save_callback
-      after_save :after_save_callback
-      before_create :before_create_callback
-      around_create :around_create_callback
-      after_create :after_create_callback
-
       MyMongoid.register_model(self)
     end
     
@@ -70,26 +63,6 @@ module MyMongoid
         @new_record = false
         true
       end
-    end
-
-    def before_save_callback
-    end
-
-    def around_save_callback
-      yield self if block_given?
-    end
-
-    def after_save_callback
-    end
-
-    def before_create_callback
-    end
-
-    def around_create_callback
-      yield self if block_given?
-    end
-
-    def after_create_callback
     end
 
     def atomic_updates
