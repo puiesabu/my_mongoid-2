@@ -1,13 +1,23 @@
 require "my_mongoid/fields"
-require "active_support/inflector"
+require "active_support"
+require "active_model"
 
 module MyMongoid
   module Document
     extend ActiveSupport::Concern
+  
+
+
+
     include Fields
     included do
       MyMongoid.register_model(self)
+      extend ActiveModel::Callbacks
+      define_model_callbacks :create, :delete, :save, :update
+      define_model_callbacks :find, :initialize, only: :after
     end
+
+
 
     def initialize(attrs = nil)
       raise ArgumentError, 'The argument is not a Hash object' unless attrs.class == Hash 
@@ -36,7 +46,6 @@ module MyMongoid
         changed_attributes[name] = @attributes[name]
         @attributes[name] = value
       end
-
     end
 
     def to_document
@@ -44,14 +53,16 @@ module MyMongoid
     end
 
     def save 
-      if @new_record == true
-        self.class.collection.insert(@attributes)
-      else changed?
-        update_document
+      run_callbacks :save do
+        if @new_record == true
+          self.class.collection.insert(@attributes)
+        else changed?
+          update_document
+        end
+        #self.class.collection.insert(@attributes)
+        @new_record = false
+        true
       end
-      #self.class.collection.insert(@attributes)
-      @new_record = false
-      true
     end
 
     def atomic_updates
@@ -133,12 +144,16 @@ module MyMongoid
       end
 
       def create(attrs = nil)
-        attributes = attrs || {}
-        doc = allocate
-        doc.instance_variable_set(:@attributes, attributes)
-        doc.instance_variable_set(:@new_record, true)
-        doc.save
-        doc
+        ActiveModel::Callbacks.run_callbacks :create do
+
+          attributes = attrs || {}
+          doc = allocate
+          doc.instance_variable_set(:@attributes, attributes)
+          doc.instance_variable_set(:@new_record, true)
+          doc.save
+          doc
+
+        end
       end
 
       def find(condition)
