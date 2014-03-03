@@ -123,7 +123,7 @@ describe "Should be able to create a record:" do
 
   describe "Model#save" do
     let(:attrs) {
-      {"id" => "1", "a" => 10, "b" => 20}
+      { "a" => 10, "b" => 20}
     }
 
     let(:event) {
@@ -133,6 +133,9 @@ describe "Should be able to create a record:" do
 
     context "successful insert:" do
       before do
+        clean_db
+        Event.collection.drop
+
         @result = event.save
       end
 
@@ -152,7 +155,7 @@ describe "Should be able to create a record:" do
 
   describe "Model.create" do
     let(:attrs) {
-      {"_id" => "1", "a" => 10, "b" => 20}
+      { "a" => 10, "b" => 20}
     }
 
     def create_event
@@ -160,6 +163,7 @@ describe "Should be able to create a record:" do
     end
 
     before do
+      clean_db
       @event = create_event
     end
 
@@ -176,6 +180,7 @@ describe "Should be able to create a record:" do
     }
 
     before do
+      clean_db
       event.save
     end
 
@@ -231,7 +236,7 @@ describe "Should be able to find a record:" do
     }
 
     before {
-      clean_db
+      Event.collection.drop
       Event.create(attrs)
     }
 
@@ -260,6 +265,14 @@ describe "Should track changes made to a record" do
   let(:event) {
     Event.instantiate({"a" => 1, "b" => 2})
   }
+
+
+  before do 
+    config_db
+    Event.collection.drop
+
+  end
+
 
   describe "#changed_attributes" do
 
@@ -302,7 +315,8 @@ describe "Should be able to update a record:" do
 
   before {
     config_db
-    clean_db
+    Event.collection.drop
+
   }
 
   describe "#atomic_updates" do
@@ -340,6 +354,12 @@ describe "Should be able to update a record:" do
     let(:event2) {
       Event.find("1")
     }
+
+    before do 
+      config_db
+      Event.collection.drop
+
+    end
 
     describe "#save" do
       it "should have no changes right after persisting" do
@@ -390,7 +410,8 @@ describe "Should be able to delete a record:" do
 
   before {
     config_db
-    clean_db
+    Event.collection.drop
+
     Event.create(attrs)
   }
 

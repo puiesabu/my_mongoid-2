@@ -63,6 +63,7 @@ module MyMongoid
         @new_record = false
         true
       end
+      true
     end
 
     def atomic_updates
@@ -144,7 +145,6 @@ module MyMongoid
       end
 
       def create(attrs = nil)
-        ActiveModel::Callbacks.run_callbacks :create do
 
           attributes = attrs || {}
           doc = allocate
@@ -153,7 +153,6 @@ module MyMongoid
           doc.save
           doc
 
-        end
       end
 
       def find(condition)
