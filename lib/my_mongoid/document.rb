@@ -1,24 +1,21 @@
 require "my_mongoid/fields"
-require "active_support"
+require "active_support/inflector"
 require "active_model"
 
 module MyMongoid
   module Document
     extend ActiveSupport::Concern
-  
-
-
-
     include Fields
     included do
-      MyMongoid.register_model(self)
       extend ActiveModel::Callbacks
-      define_model_callbacks :create, :delete, :save, :update
+      include ActiveModel::Validations::Callbacks
+
+      define_model_callbacks :delete, :save, :create, :update
       define_model_callbacks :find, :initialize, only: :after
+
+      MyMongoid.register_model(self)
     end
-
-
-
+    
     def initialize(attrs = nil)
       raise ArgumentError, 'The argument is not a Hash object' unless attrs.class == Hash 
       @attributes = {}
@@ -46,6 +43,7 @@ module MyMongoid
         changed_attributes[name] = @attributes[name]
         @attributes[name] = value
       end
+
     end
 
     def to_document
@@ -53,45 +51,16 @@ module MyMongoid
     end
 
     def save 
-      run_callbacks :save do
-
+      run_callbacks(:save) do
         if @new_record == true
-          self.class.collection.insert(@attributes)
+          run_callbacks(:create) do
+            self.class.collection.insert(@attributes)
+          end
         else changed?
           update_document
         end
         #self.class.collection.insert(@attributes)
         @new_record = false
-        true
-      end
-      true
-    end
-
-
-    def save(create = nil)
-      run_callbacks :save do
-        if create    
-          run_callbacks :create do
-
-            if @new_record == true
-              self.class.collection.insert(@attributes)
-            else changed?
-              update_document
-            end
-            #self.class.collection.insert(@attributes)
-            @new_record = false
-            return true
-          end
-        else     
-            if @new_record == true
-              self.class.collection.insert(@attributes)
-            else changed?
-              update_document
-            end
-            #self.class.collection.insert(@attributes)
-            @new_record = false
-            return true
-        end
         true
       end
     end
@@ -151,7 +120,6 @@ module MyMongoid
     end
     alias_method  :attributes= ,  :process_attributes
 
-
     module ClassMethods
 
       def is_mongoid_model?
@@ -175,14 +143,12 @@ module MyMongoid
       end
 
       def create(attrs = nil)
-
-          attributes = attrs || {}
-          doc = allocate
-          doc.instance_variable_set(:@attributes, attributes)
-          doc.instance_variable_set(:@new_record, true)
-          doc.save(:create)
-          doc
-
+        attributes = attrs || {}
+        doc = allocate
+        doc.instance_variable_set(:@attributes, attributes)
+        doc.instance_variable_set(:@new_record, true)
+        doc.save
+        doc
       end
 
       def find(condition)
