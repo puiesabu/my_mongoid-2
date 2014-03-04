@@ -34,11 +34,21 @@ module MyMongoid
         @chain << callback
       end
 
-      def invoke(target)
-        yield
+      def invoke(target, &block)
         chain.each do |callback|
           callback.invoke(target)
         end
+
+        block.call
+      end
+    end
+
+    def run_callbacks(name, &block)
+      cbs = send("_#{name}_callbacks")
+      if cbs.empty?
+        yield if block_given?
+      else
+        cbs.invoke(self, &block)
       end
     end
 
