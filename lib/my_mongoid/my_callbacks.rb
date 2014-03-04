@@ -17,8 +17,28 @@ module MyMongoid
     end
 
     class CallbackChain
-      def initialize(name)
+      def initialize(name = nil)
         @name = name
+        @chain ||= []
+      end
+
+      def empty?
+        @chain.empty?
+      end
+
+      def chain
+        @chain
+      end
+
+      def append(callback)
+        @chain << callback
+      end
+
+      def invoke(target)
+        yield
+        chain.each do |callback|
+          callback.invoke(target)
+        end
       end
     end
 
