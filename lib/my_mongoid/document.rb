@@ -1,4 +1,5 @@
 require "my_mongoid/fields"
+require "my_mongoid/my_callbacks"
 require "active_support/inflector"
 require "active_model"
 
@@ -6,6 +7,7 @@ module MyMongoid
   module Document
     extend ActiveSupport::Concern
     include Fields
+    
     included do
       extend ActiveModel::Callbacks
       include ActiveModel::Validations::Callbacks
