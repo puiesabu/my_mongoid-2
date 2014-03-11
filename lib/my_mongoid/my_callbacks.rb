@@ -65,13 +65,28 @@ module MyMongoid
         end
       end
 
-      def sort_callbacks(callbacks)
-        before_callbacks = CallbackChain.new
+      def compile
+        k = nil
+        i = chain.length
+        while i >= 0
+          k = _compile(k, i)
+          i -= 1
+        end
+        k
+      end
 
-        callbacks.each do |callback|
+      def _compile(k, i)
+        if i == chain.length
+          lambda { |_, &block| block.call }
+        else
+          callback = chain[i]
+
           case callback.kind
           when :before
-            before_callbacks.append(callback)
+            lambda { |target, &block|
+              callback.invoke(target)
+              k.call(target, &block)
+            }
           end
         end
       end
